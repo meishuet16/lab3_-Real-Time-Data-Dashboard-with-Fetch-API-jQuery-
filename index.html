@@ -29,6 +29,36 @@
       <button id="btn-fahrenheit" class="unit-btn" aria-label="Switch to Fahrenheit">°F</button>
     </div>
   </header>
+
+  <!--MAIN CONTENT-->
+  <main class="container">
+ 
+    <!-- Search Bar -->
+    <section class="search-section" aria-label="City search">
+      <div class="search-wrapper">
+        <input
+          type="text"
+          id="city-input"
+          class="search-input"
+          placeholder="Search for a city…"
+          autocomplete="off"
+          aria-label="Enter city name"
+          maxlength="60"
+        />
+        <button id="search-btn" class="search-btn" aria-label="Search weather">
+          <span class="btn-icon">🔍</span>
+          <span class="btn-text">Search</span>
+        </button>
+      </div>
+ 
+      <!-- Validation message -->
+      <p id="validation-msg" class="validation-msg" role="alert" aria-live="polite"></p>
+ 
+      <!-- Error banner (network / HTTP / timeout errors) -->
+      <div id="error-banner" class="error-banner hidden" role="alert">
+        <span id="error-text" class="error-text"></span>
+        <button id="retry-btn" class="retry-btn">↺ Retry</button>
+      </div>
   
 </body>
 </html>
