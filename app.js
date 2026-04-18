@@ -277,6 +277,25 @@ const App = (() => {
     },
   };
 
+  // TimeService
+  const TimeService = {
+    fetchLocalTime(timezone) {
+      $.getJSON(`${CONFIG.timezoneURL}/${encodeURIComponent(timezone)}`)
+        .done(function (data) {
+          const localTime = new Date(data.datetime);
+          const timeStr   = localTime.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+          DOM.localTime.textContent = `🕐 Local Time: ${timeStr}`;
+        })
+        .fail(function () {
+          const fallback = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+          DOM.localTime.textContent = `🕐 Browser Time: ${fallback} (fallback)`;
+        })
+        .always(function () {
+          console.log(`[WeatherNow] WorldTimeAPI request completed at: ${new Date().toISOString()}`);
+        });
+    },
+  };
+  
 
   return {};
 })();
