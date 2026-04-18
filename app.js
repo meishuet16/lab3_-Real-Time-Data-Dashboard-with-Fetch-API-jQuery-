@@ -9,6 +9,11 @@ const App = (() => {
     maxRecent    : 5,
   };
 
+ /**
+   * Weather code lookup table — Task 2
+   * Maps WMO Weather Interpretation Codes (description, emoji )
+   * Source: https://open-meteo.com/en/docs#weathervariables
+   */
   const WEATHER_CODES = {
     0  : { description: 'Clear Sky',                  emoji: '☀️'  },
     1  : { description: 'Mainly Clear',               emoji: '🌤️' },
@@ -36,6 +41,9 @@ const App = (() => {
     99 : { description: 'Thunderstorm w/ Heavy Hail', emoji: '⛈️' },
   };
 
+/* STATE
+   Everything the app "remembers" lives here, inside this object.
+   Like a notebook — we write down what we know.*/
   const state = {
     unit         : 'C',
     lastCity     : null,
@@ -43,7 +51,8 @@ const App = (() => {
     debounceTimer: null,
   };
 
-  //  DOM References
+  /* DOM References(Grab all HTML elements we need once at startup — like getting
+     all your ingredients from the fridge BEFORE cooking.)*/
   const DOM = {
     cityInput    : document.getElementById('city-input'),
     searchBtn    : document.getElementById('search-btn'),
@@ -161,26 +170,51 @@ const App = (() => {
 
  //API 
   const API = {
+
+    /**
+     * Fetch with AbortController timeout — Task 4, point 19
+     * Creates a controller, sets a 10-second timeout, then fetches.
+     * If time runs out → controller.abort() is called → fetch rejects.
+     *
+     * @param {string} url - the URL to fetch
+     * @returns {Promise<Response>}
+     */
     async fetchWithTimeout(url) {
+      // AbortController — like a "cancel" button for the request
       const controller = new AbortController();
       const timeoutId  = setTimeout(() => controller.abort(), CONFIG.timeoutMs);
       try {
         const response = await fetch(url, { signal: controller.signal });
-        clearTimeout(timeoutId);
+        clearTimeout(timeoutId); // cancel the timeout if we got a response in time
+
         if (!response.ok) {
           throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
         }
+
         return response;
       } catch (err) {
         clearTimeout(timeoutId);
         throw err;
       }
     },
+
+    /**
+     * Step 1 — Geocoding API call
+     * Converts a city name string → { latitude, longitude, timezone, name }
+     * Task 2, points 5 & 6
+     *
+     * @param {string} cityName
+     * @returns {Promise<Object|null>} city object or null if not found
+     */
     async geocodeCity(cityName) {
       const url = `${CONFIG.geocodingURL}?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`;
       const response = await API.fetchWithTimeout(url);
       const data     = await response.json();
+
+      // Task 2, If results array is empty, do NOT throw, return null
       if (!data.results || data.results.length === 0) return null;
+
+      // Return the first (best) result
       const result = data.results[0];
       return {
         name     : result.name,
@@ -190,6 +224,16 @@ const App = (() => {
         timezone : result.timezone,
       };
     },
+
+    /**
+     * Step 2 — Weather API call
+     * Fetches current + hourly + daily forecast using lat/lon.
+     * Task 2, point 7
+     *
+     * @param {number} lat
+     * @param {number} lon
+     * @returns {Promise<Object>} raw Open-Meteo response
+     */
     async fetchWeather(lat, lon) {
       const params = new URLSearchParams({
         latitude        : lat,
@@ -322,7 +366,7 @@ const App = (() => {
 
     /**
      * Fetch local time from WorldTimeAPI using the city's IANA timezone.
-     * Task 3, points 11-15.
+     * Task 3
      *
      * @param {string} timezone - e.g. "Asia/Kuala_Lumpur"
      */
@@ -334,16 +378,18 @@ const App = (() => {
           DOM.localTime.textContent = `🕐 Local Time: ${timeStr}`;
         })
         .fail(function () {
+          // Task 3 — fallback to browser local time if timezone not available
           const fallback = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
           DOM.localTime.textContent = `🕐 Browser Time: ${fallback} (fallback)`;
         })
         .always(function () {
+          // Task 3— log timestamp of completed request to browser console
           console.log(`[WeatherNow] WorldTimeAPI request completed at: ${new Date().toISOString()}`);
         });
     },
   };
 
-  // RecentSearches 
+  // RecentSearches (BONUS:LOCALSTORAGE)
   const RecentSearches = {
 
     /** Read the saved list from localStorage */
