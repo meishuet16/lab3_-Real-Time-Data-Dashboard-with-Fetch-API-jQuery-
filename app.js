@@ -206,5 +206,77 @@ const App = (() => {
     },
   };
 
+  //  UI 
+  const UI = {
+    populateCurrent(cityInfo, weatherData) {
+      const cw     = weatherData.current_weather;
+      const hourly = weatherData.hourly;
+      const currentHour = cw.time.slice(0, 13);
+      const hourIndex   = hourly.time.findIndex(t => t.startsWith(currentHour));
+      const safeIndex   = hourIndex >= 0 ? hourIndex : 0;
+      const humidity    = hourly.relativehumidity_2m[safeIndex];
+      const windSpeed   = hourly.windspeed_10m[safeIndex] ?? cw.windspeed;
+      const weather     = Utils.decodeWeather(cw.weathercode);
+      state.lastWeather = {
+        cityInfo,
+        temp     : cw.temperature,
+        humidity,
+        windSpeed,
+        weather,
+        dailyMax : weatherData.daily.temperature_2m_max,
+        dailyMin : weatherData.daily.temperature_2m_min,
+        dailyCode: weatherData.daily.weathercode,
+        dailyTime: weatherData.daily.time,
+      };
+      Skeleton.hideCurrent();
+      DOM.cityName.textContent    = `${cityInfo.name}, ${cityInfo.country}`;
+      DOM.weatherDesc.textContent = weather.description;
+      DOM.weatherIcon.textContent = weather.emoji;
+      DOM.temperature.textContent = Utils.formatTemp(cw.temperature);
+      DOM.humidity.textContent    = `${humidity ?? '--'}%`;
+      DOM.windSpeed.textContent   = `${windSpeed ?? '--'} km/h`;
+      DOM.localTime.textContent   = 'Fetching local time…';
+    },
+    populateForecast(weatherData) {
+      const daily = weatherData.daily;
+      DOM.forecastRow.innerHTML = '';
+      for (let i = 0; i < 7; i++) {
+        const weather = Utils.decodeWeather(daily.weathercode[i]);
+        const dayName = Utils.getDayName(daily.time[i]);
+        const high    = Utils.formatTemp(daily.temperature_2m_max[i]);
+        const low     = Utils.formatTemp(daily.temperature_2m_min[i]);
+        DOM.forecastRow.insertAdjacentHTML('beforeend', `
+          <div class="forecast-card" aria-label="${dayName} forecast">
+            <div class="forecast-day">${i === 0 ? 'Today' : dayName}</div>
+            <div class="forecast-icon" aria-hidden="true">${weather.emoji}</div>
+            <div class="forecast-high">${high}</div>
+            <div class="forecast-low">${low}</div>
+          </div>
+        `);
+      }
+    },
+    rerenderTemperatures() {
+      if (!state.lastWeather) return;
+      const { temp, dailyMax, dailyMin, dailyCode, dailyTime } = state.lastWeather;
+      DOM.temperature.textContent = Utils.formatTemp(temp);
+      DOM.forecastRow.innerHTML = '';
+      for (let i = 0; i < 7; i++) {
+        const weather = Utils.decodeWeather(dailyCode[i]);
+        const dayName = Utils.getDayName(dailyTime[i]);
+        const high    = Utils.formatTemp(dailyMax[i]);
+        const low     = Utils.formatTemp(dailyMin[i]);
+        DOM.forecastRow.insertAdjacentHTML('beforeend', `
+          <div class="forecast-card">
+            <div class="forecast-day">${i === 0 ? 'Today' : dayName}</div>
+            <div class="forecast-icon" aria-hidden="true">${weather.emoji}</div>
+            <div class="forecast-high">${high}</div>
+            <div class="forecast-low">${low}</div>
+          </div>
+        `);
+      }
+    },
+  };
+
+
   return {};
 })();
