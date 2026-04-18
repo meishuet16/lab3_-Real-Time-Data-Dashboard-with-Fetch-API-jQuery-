@@ -1,0 +1,43 @@
+/* ============================================================
+   style.css — WeatherNow Dashboard
+   Aesthetic: Dark-sky atmospheric with warm amber accents
+   ============================================================ */
+
+/*CSS Custom Properties (Variables)*/
+:root {
+  --bg-deep:        #0a0e1a;   /* deep night sky */
+  --bg-card:        #111827;   /* card background */
+  --bg-card-hover:  #1a2235;
+  --accent:         #f59e0b;   /* warm amber */
+  --accent-light:   #fcd34d;
+  --text-primary:   #f0f4ff;
+  --text-secondary: #94a3b8;
+  --text-muted:     #475569;
+  --border:         #1e293b;
+  --success:        #34d399;
+  --danger:         #f87171;
+  --radius-sm:      6px;
+  --radius-md:      14px;
+  --radius-lg:      22px;
+  --shadow:         0 8px 32px rgba(0,0,0,0.45);
+  --transition:     0.25s ease;
+  --font-display:   'Syne', sans-serif;
+  --font-body:      'DM Sans', sans-serif;
+}
+
+/*Reset & Base*/
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { font-size: 16px; scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  /* Atmospheric starfield-like noise using radial gradients */
+  background-image:
+    radial-gradient(ellipse 80% 60% at 50% -10%, #1a2a4a 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 80%, #0f1f38 0%, transparent 60%);
+}
+
