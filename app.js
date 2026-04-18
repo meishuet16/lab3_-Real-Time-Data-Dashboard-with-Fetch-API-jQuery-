@@ -159,5 +159,52 @@ const App = (() => {
     },
   };
 
+ //API 
+  const API = {
+    async fetchWithTimeout(url) {
+      const controller = new AbortController();
+      const timeoutId  = setTimeout(() => controller.abort(), CONFIG.timeoutMs);
+      try {
+        const response = await fetch(url, { signal: controller.signal });
+        clearTimeout(timeoutId);
+        if (!response.ok) {
+          throw new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+        }
+        return response;
+      } catch (err) {
+        clearTimeout(timeoutId);
+        throw err;
+      }
+    },
+    async geocodeCity(cityName) {
+      const url = `${CONFIG.geocodingURL}?name=${encodeURIComponent(cityName)}&count=1&language=en&format=json`;
+      const response = await API.fetchWithTimeout(url);
+      const data     = await response.json();
+      if (!data.results || data.results.length === 0) return null;
+      const result = data.results[0];
+      return {
+        name     : result.name,
+        country  : result.country_code,
+        latitude : result.latitude,
+        longitude: result.longitude,
+        timezone : result.timezone,
+      };
+    },
+    async fetchWeather(lat, lon) {
+      const params = new URLSearchParams({
+        latitude        : lat,
+        longitude       : lon,
+        current_weather : 'true',
+        hourly          : 'temperature_2m,relativehumidity_2m,windspeed_10m',
+        daily           : 'temperature_2m_max,temperature_2m_min,weathercode',
+        timezone        : 'auto',
+        forecast_days   : 7,
+      });
+      const url      = `${CONFIG.weatherURL}?${params.toString()}`;
+      const response = await API.fetchWithTimeout(url);
+      return response.json();
+    },
+  };
+
   return {};
 })();
