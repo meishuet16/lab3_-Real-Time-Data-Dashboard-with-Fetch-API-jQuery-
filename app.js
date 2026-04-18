@@ -142,5 +142,22 @@ const App = (() => {
     },
   };
 
+  // ErrorUI 
+  const ErrorUI = {
+    showBanner(message) {
+      DOM.errorText.textContent = message;
+      DOM.errorBanner.classList.remove('hidden');
+    },
+    hideBanner() {
+      DOM.errorBanner.classList.add('hidden');
+    },
+    showValidation(message) {
+      DOM.validationMsg.textContent = message;
+    },
+    clearValidation() {
+      DOM.validationMsg.textContent = '';
+    },
+  };
+
   return {};
 })();
