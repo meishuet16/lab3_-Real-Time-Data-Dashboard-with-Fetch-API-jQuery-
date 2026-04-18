@@ -239,3 +239,95 @@ body {
 .skeleton-text-sm { height: 0.9em;  width: 45%; display: inline-block; }
 .skeleton-text-lg { height: 1.8em;  width: 80%; display: inline-block; }
 .skeleton-circle  { width: 3.5rem; height: 3.5rem; border-radius: 50%; display: flex; }
+
+/* Current Weather Card */
+.current-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2rem 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  box-shadow: var(--shadow);
+  margin-bottom: 2.5rem;
+  animation: fadeIn 0.4s ease;
+}
+ 
+.current-left  { flex: 1; min-width: 0; }
+.current-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+}
+.current-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-width: 140px;
+}
+ 
+.city-name {
+  font-family: var(--font-display);
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  color: var(--text-primary);
+  min-height: 1.2em;
+}
+ 
+.local-time {
+  font-size: 0.9rem;
+  color: var(--accent);
+  margin: 0.35rem 0;
+  min-height: 1em;
+}
+ 
+.weather-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  min-height: 1em;
+}
+ 
+.weather-icon {
+  font-size: 3.2rem;
+  line-height: 1;
+  min-width: 3.5rem;
+  min-height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+ 
+.temperature {
+  font-family: var(--font-display);
+  font-size: 3rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  min-height: 1.2em;
+}
+ 
+.detail-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+ 
+.detail-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+}
+ 
+.detail-value {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  min-height: 1em;
+  min-width: 80px;
+}
+
