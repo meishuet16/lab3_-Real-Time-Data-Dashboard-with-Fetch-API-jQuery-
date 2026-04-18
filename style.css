@@ -216,6 +216,9 @@ body {
   color: var(--accent);
 }
 
+/* ---------- Hidden utility ---------- */
+.hidden { display: none !important; }
+
 /* Skeleton Loading Animation 
    Rubric: Skeleton loading animation — displays before data, removes after
    The @keyframes shimmer is specified exactly as per the assignment requirements.*/
@@ -393,4 +396,34 @@ body {
   font-size: 0.85rem;
   color: var(--text-muted);
   min-height: 1em;
+}
+
+/* ---------- Utility Animations ---------- */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0);   }
+}
+ 
+/* ---------- Responsive ---------- */
+@media (max-width: 700px) {
+  .current-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.5rem;
+  }
+ 
+  .current-right { flex-direction: row; gap: 2rem; }
+ 
+  .forecast-row {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+ 
+@media (max-width: 440px) {
+  .forecast-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+ 
+  .temperature { font-size: 2.2rem; }
+  .city-name   { font-size: 1.5rem; }
 }
