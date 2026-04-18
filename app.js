@@ -88,5 +88,59 @@ const App = (() => {
     },
   };
 
+  //  Skeleton
+  const Skeleton = {
+    showCurrent() {
+      const fields = [
+        DOM.cityName, DOM.localTime, DOM.weatherDesc,
+        DOM.weatherIcon, DOM.temperature, DOM.humidity, DOM.windSpeed,
+      ];
+      fields.forEach(el => {
+        el.classList.add('skeleton');
+        el.textContent = ' ';
+      });
+      DOM.cityName.classList.add('skeleton-text-lg');
+      DOM.localTime.classList.add('skeleton-text-sm');
+      DOM.weatherDesc.classList.add('skeleton-text-sm');
+      DOM.weatherIcon.classList.add('skeleton-circle');
+      DOM.temperature.classList.add('skeleton-text-lg');
+      DOM.humidity.classList.add('skeleton-text-sm');
+      DOM.windSpeed.classList.add('skeleton-text-sm');
+    },
+    hideCurrent() {
+      const fields = [
+        DOM.cityName, DOM.localTime, DOM.weatherDesc,
+        DOM.weatherIcon, DOM.temperature, DOM.humidity, DOM.windSpeed,
+      ];
+      fields.forEach(el => {
+        el.classList.remove(
+          'skeleton', 'skeleton-text', 'skeleton-text-sm',
+          'skeleton-text-lg', 'skeleton-circle'
+        );
+      });
+    },
+    showForecast() {
+      DOM.forecastRow.innerHTML = '';
+      for (let i = 0; i < 7; i++) {
+        DOM.forecastRow.insertAdjacentHTML('beforeend', `
+          <div class="forecast-card">
+            <div class="forecast-day  skeleton skeleton-text"    style="width:80%">&nbsp;</div>
+            <div class="forecast-icon skeleton skeleton-circle"  style="width:2rem;height:2rem">&nbsp;</div>
+            <div class="forecast-high skeleton skeleton-text-sm" style="width:60%">&nbsp;</div>
+            <div class="forecast-low  skeleton skeleton-text-sm" style="width:50%">&nbsp;</div>
+          </div>
+        `);
+      }
+    },
+    hideForecast() {
+      DOM.forecastRow.querySelectorAll('.skeleton').forEach(el => {
+        el.classList.remove(
+          'skeleton', 'skeleton-text', 'skeleton-text-sm',
+          'skeleton-text-lg', 'skeleton-circle'
+        );
+      });
+    },
+  };
+
   return {};
 })();
