@@ -206,17 +206,32 @@ const App = (() => {
     },
   };
 
-  //  UI 
+  //  UI POPULATION-TAKES raw API data & write into DOM
   const UI = {
+
+     /**
+     * Populate the current weather card.
+     * Task 2 — remove skeletons, fill in data.
+     *
+     * @param {Object} cityInfo    - from geocodeCity()
+     * @param {Object} weatherData - raw Open-Meteo response
+     */
     populateCurrent(cityInfo, weatherData) {
-      const cw     = weatherData.current_weather;
+      const cw     = weatherData.current_weather; //shorthand
       const hourly = weatherData.hourly;
+
+      // Find the index of the current hour in the hourly array
+      // The current_weather.time is like "2024-06-10T14:00"
       const currentHour = cw.time.slice(0, 13);
       const hourIndex   = hourly.time.findIndex(t => t.startsWith(currentHour));
       const safeIndex   = hourIndex >= 0 ? hourIndex : 0;
       const humidity    = hourly.relativehumidity_2m[safeIndex];
       const windSpeed   = hourly.windspeed_10m[safeIndex] ?? cw.windspeed;
+
+      // Decode the weather code → description + emoji
       const weather     = Utils.decodeWeather(cw.weathercode);
+
+     // Save to state for unit conversion without re-fetch
       state.lastWeather = {
         cityInfo,
         temp     : cw.temperature,
@@ -228,23 +243,41 @@ const App = (() => {
         dailyCode: weatherData.daily.weathercode,
         dailyTime: weatherData.daily.time,
       };
+
+      //Remove skeleton classes-data is ready
       Skeleton.hideCurrent();
+
+       // Write data into the DOM
       DOM.cityName.textContent    = `${cityInfo.name}, ${cityInfo.country}`;
       DOM.weatherDesc.textContent = weather.description;
       DOM.weatherIcon.textContent = weather.emoji;
       DOM.temperature.textContent = Utils.formatTemp(cw.temperature);
       DOM.humidity.textContent    = `${humidity ?? '--'}%`;
       DOM.windSpeed.textContent   = `${windSpeed ?? '--'} km/h`;
+
+      // Local time will be filled by jQuery AJAX (Task 3)
       DOM.localTime.textContent   = 'Fetching local time…';
     },
+
+    /**
+     * Populate the 7-day forecast row.
+     *
+     * @param {Object} weatherData - raw Open-Meteo response
+     */
     populateForecast(weatherData) {
       const daily = weatherData.daily;
+
+      //Clear exsiting skeleton cards
       DOM.forecastRow.innerHTML = '';
+
+      // Loop thru 7 days and create a card for each
       for (let i = 0; i < 7; i++) {
         const weather = Utils.decodeWeather(daily.weathercode[i]);
         const dayName = Utils.getDayName(daily.time[i]);
         const high    = Utils.formatTemp(daily.temperature_2m_max[i]);
         const low     = Utils.formatTemp(daily.temperature_2m_min[i]);
+
+        // Build the card HTML
         DOM.forecastRow.insertAdjacentHTML('beforeend', `
           <div class="forecast-card" aria-label="${dayName} forecast">
             <div class="forecast-day">${i === 0 ? 'Today' : dayName}</div>
@@ -255,6 +288,11 @@ const App = (() => {
         `);
       }
     },
+
+   /**
+    * Re-render temperatures only (used by unit toggle — Bonus).
+    * No API call needed — already have the data in state.
+    */
     rerenderTemperatures() {
       if (!state.lastWeather) return;
       const { temp, dailyMax, dailyMin, dailyCode, dailyTime } = state.lastWeather;
@@ -340,6 +378,164 @@ const App = (() => {
     },
   };
 
+ /*  MAIN SEARCH ORCHESTRATOR
+     This is the "conductor" — calls all the other functions
+     in the right order, like a cooking show chef!*/
+
+  /**
+   * handleSearch — called when user clicks Search or presses Enter.
+   * Orchestrates: validate → skeleton → geocode → weather → jQuery time
+   */
+  async function handleSearch() {
+    const cityName = DOM.cityInput.value.trim();
+ 
+    // Task 4 — validate: empty or < 2 characters
+    if (cityName.length < 2) {
+      ErrorUI.showValidation('⚠️ Please enter at least 2 characters.');
+      return;
+    }
+ 
+    // Clear any previous messages
+    ErrorUI.clearValidation();
+    ErrorUI.hideBanner();
+ 
+    // Save and remember for retry
+    state.lastCity = cityName;
+ 
+    // Show skeleton loaders while fetching
+    Skeleton.showCurrent();
+    Skeleton.showForecast();
+ 
+    // Disable search button during request
+    DOM.searchBtn.disabled = true;
+ 
+    try {
+      /* Step 1: Geocoding (Fetch API) */
+      const cityInfo = await API.geocodeCity(cityName);
+ 
+      // Task 2 — city not found , show error state, do not throw
+      if (!cityInfo) {
+        Skeleton.hideCurrent();
+        Skeleton.hideForecast();
+        DOM.cityName.textContent  = 'City not found';
+        DOM.localTime.textContent = '';
+        DOM.weatherDesc.textContent = `We couldn't find "${cityName}". Try a different spelling.`;
+        DOM.errorBanner.classList.add('hidden');
+        DOM.searchBtn.disabled = false;
+        return;
+      }
+ 
+      /* Step 2: Weather data (Fetch API, chained after geocoding) */
+      const weatherData = await API.fetchWeather(cityInfo.latitude, cityInfo.longitude);
+ 
+      /* Step 3: Populate UI */
+      UI.populateCurrent(cityInfo, weatherData);
+      UI.populateForecast(weatherData);
+ 
+      /* Step 4: Local time via jQuery AJAX (Task 3)*/
+      if (cityInfo.timezone) {
+        TimeService.fetchLocalTime(cityInfo.timezone);
+      } else {
+        // Fallback — no timezone from geocoding
+        const fallback = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        DOM.localTime.textContent = `🕐 Browser Time: ${fallback} (no timezone)`;
+      }
+ 
+      /* ---- Bonus: Save to recent searches ---- */
+      RecentSearches.save(cityInfo.name);
+      RecentSearches.render();
+ 
+    } catch (err) {
+      // Task 2, point 9 — network / HTTP / timeout errors → show error banner + retry
+      Skeleton.hideCurrent();
+      Skeleton.hideForecast();
+ 
+      let message = '❌ Network error. Please check your connection.';
+ 
+      if (err.name === 'AbortError') {
+        // Task 4 — AbortController timeout error
+        message = '⏱️ Request timed out after 10 seconds. Please try again.';
+      } else if (err.message.startsWith('HTTP Error')) {
+        // Task 4 — HTTP error with status code
+        message = `❌ ${err.message}`;
+      }
+ 
+      ErrorUI.showBanner(message);
+      console.error('[WeatherNow] Fetch error:', err);
+ 
+    } finally {
+      // Always re-enable the search button when done
+      DOM.searchBtn.disabled = false;
+    }
+  }
+ 
+  /* EVENT LISTENERS & INIT
+     Wire up all user interactions here */
+ 
+  function init() {
+ 
+    /*  Search button click  */
+    DOM.searchBtn.addEventListener('click', handleSearch);
+ 
+    /*  Enter key in search input */
+    DOM.cityInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleSearch();
+    });
+ 
+    /* Debounced typing handler (Task 4) 
+         The user types quickly → we wait 500ms after they stop
+         before making any API call. No redundant calls */
+    const debouncedSearch = Utils.debounce(handleSearch, CONFIG.debounceDelay);
+    // Attach debounced search to input event
+    // still do the immediate search on button/enter — debounce is for live typing
+    DOM.cityInput.addEventListener('input', () => {
+      // Only auto-search if input is long enough (avoids skeleton flash on short strings)
+      if (DOM.cityInput.value.trim().length >= 3) {
+        debouncedSearch();
+      }
+    });
+ 
+    /* Retry button click (Task 2) */
+    DOM.retryBtn.addEventListener('click', () => {
+      ErrorUI.hideBanner();
+      if (state.lastCity) {
+        DOM.cityInput.value = state.lastCity;
+        handleSearch();
+      }
+    });
+ 
+    /* Unit toggle buttons (Bonus) */
+    DOM.btnC.addEventListener('click', () => {
+      if (state.unit === 'C') return;
+      state.unit = 'C';
+      DOM.btnC.classList.add('active');
+      DOM.btnF.classList.remove('active');
+      UI.rerenderTemperatures();
+    });
+ 
+    DOM.btnF.addEventListener('click', () => {
+      if (state.unit === 'F') return;
+      state.unit = 'F';
+      DOM.btnF.classList.add('active');
+      DOM.btnC.classList.remove('active');
+      UI.rerenderTemperatures();
+    });
+ 
+    /* Render recent searches on page load (Bonus) */
+    RecentSearches.render();
+ 
+    /* Build initial skeleton UI so page doesn't look empty */
+    Skeleton.showCurrent();
+    Skeleton.showForecast();
+ 
+    /* Focus the search input on load for better UX */
+    DOM.cityInput.focus();
+ 
+    console.log('[WeatherNow] App initialized ✅');
+  }
+ 
+  /* Run init when the DOM is ready */
+  init();
 
   return {};
 })();
