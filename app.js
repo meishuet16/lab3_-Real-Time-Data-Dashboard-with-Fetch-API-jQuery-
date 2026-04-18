@@ -43,5 +43,50 @@ const App = (() => {
     debounceTimer: null,
   };
 
+  //  DOM References
+  const DOM = {
+    cityInput    : document.getElementById('city-input'),
+    searchBtn    : document.getElementById('search-btn'),
+    validationMsg: document.getElementById('validation-msg'),
+    errorBanner  : document.getElementById('error-banner'),
+    errorText    : document.getElementById('error-text'),
+    retryBtn     : document.getElementById('retry-btn'),
+    recentDiv    : document.getElementById('recent-searches'),
+    forecastRow  : document.getElementById('forecast-row'),
+    cityName     : document.getElementById('city-name'),
+    localTime    : document.getElementById('local-time'),
+    weatherDesc  : document.getElementById('weather-desc'),
+    weatherIcon  : document.getElementById('weather-icon'),
+    temperature  : document.getElementById('temperature'),
+    humidity     : document.getElementById('humidity'),
+    windSpeed    : document.getElementById('wind-speed'),
+    btnC         : document.getElementById('btn-celsius'),
+    btnF         : document.getElementById('btn-fahrenheit'),
+  };
+
+  //  Utils
+  const Utils = {
+    debounce(fn, delay) {
+      return function (...args) {
+        clearTimeout(state.debounceTimer);
+        state.debounceTimer = setTimeout(() => fn.apply(this, args), delay);
+      };
+    },
+    cToF(c) {
+      return ((c * 9) / 5 + 32).toFixed(1);
+    },
+    formatTemp(value) {
+      const val = state.unit === 'F' ? Utils.cToF(value) : Number(value).toFixed(1);
+      return `${val}°${state.unit}`;
+    },
+    decodeWeather(code) {
+      return WEATHER_CODES[code] ?? { description: 'Unknown', emoji: '🌡️' };
+    },
+    getDayName(isoString) {
+      const date = new Date(isoString + 'T00:00:00');
+      return date.toLocaleDateString('en-US', { weekday: 'short' });
+    },
+  };
+
   return {};
 })();
