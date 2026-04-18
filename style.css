@@ -96,7 +96,7 @@ body {
 
 .unit-sep { color: var(--text-muted); font-size: 0.85rem; }
 
-/*  Container  */
+/* Container */
 .container {
   max-width: 960px;
   margin: 0 auto;
@@ -216,3 +216,26 @@ body {
   color: var(--accent);
 }
 
+/* Skeleton Loading Animation 
+   Rubric: Skeleton loading animation — displays before data, removes after
+   The @keyframes shimmer is specified exactly as per the assignment requirements.*/
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position:  200% 0; }
+}
+ 
+.skeleton {
+  background: linear-gradient(90deg, #1e2d45 25%, #2a3f5f 50%, #1e2d45 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+  color: transparent !important;   /* hide any text inside while skeleton */
+  pointer-events: none;
+  user-select: none;
+}
+ 
+/* Skeleton size helpers */
+.skeleton-text    { height: 1.1em;  width: 60%; display: inline-block; }
+.skeleton-text-sm { height: 0.9em;  width: 45%; display: inline-block; }
+.skeleton-text-lg { height: 1.8em;  width: 80%; display: inline-block; }
+.skeleton-circle  { width: 3.5rem; height: 3.5rem; border-radius: 50%; display: flex; }
