@@ -398,6 +398,18 @@ body {
   min-height: 1em;
 }
 
+/* ---------- Footer ---------- */
+.site-footer {
+  text-align: center;
+  padding: 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+ 
+.site-footer a { color: var(--accent); text-decoration: none; }
+.site-footer a:hover { text-decoration: underline; }
+
 /* ---------- Utility Animations ---------- */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(8px); }
