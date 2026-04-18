@@ -277,8 +277,17 @@ const App = (() => {
     },
   };
 
+/*JQUERY AJAX (Task 3)-Fetches the local time for the searched city using WorldTimeAPI.
+  Rubric: jQuery AJAX — correct .done()/.fail()/.always() chaining*/
   // TimeService
   const TimeService = {
+
+    /**
+     * Fetch local time from WorldTimeAPI using the city's IANA timezone.
+     * Task 3, points 11-15.
+     *
+     * @param {string} timezone - e.g. "Asia/Kuala_Lumpur"
+     */
     fetchLocalTime(timezone) {
       $.getJSON(`${CONFIG.timezoneURL}/${encodeURIComponent(timezone)}`)
         .done(function (data) {
@@ -295,7 +304,42 @@ const App = (() => {
         });
     },
   };
-  
+
+  // RecentSearches 
+  const RecentSearches = {
+
+    /** Read the saved list from localStorage */
+    getList() {
+      try { return JSON.parse(localStorage.getItem('weathernow_recent') || '[]'); }
+      catch { return []; }
+    },
+
+     /** Save a city name (add to front, cap at maxRecent, no duplicates) */
+    save(cityName) {
+      let list = RecentSearches.getList();
+      list = list.filter(c => c.toLowerCase() !== cityName.toLowerCase());
+      list.unshift(cityName);
+      list = list.slice(0, CONFIG.maxRecent);
+      localStorage.setItem('weathernow_recent', JSON.stringify(list));
+    },
+
+    /** Render chips below the search bar */
+    render() {
+      const list = RecentSearches.getList();
+      DOM.recentDiv.innerHTML = '';
+      if (list.length === 0) return;
+      DOM.recentDiv.insertAdjacentHTML('beforeend', '<span style="font-size:0.78rem;color:#475569;align-self:center;">Recent:</span>');
+      list.forEach(city => {
+        const chip = document.createElement('button');
+        chip.className   = 'chip';
+        chip.textContent = city;
+        chip.setAttribute('aria-label', `Search ${city} again`);
+        chip.addEventListener('click', () => { DOM.cityInput.value = city; handleSearch(); });
+        DOM.recentDiv.appendChild(chip);
+      });
+    },
+  };
+
 
   return {};
 })();
