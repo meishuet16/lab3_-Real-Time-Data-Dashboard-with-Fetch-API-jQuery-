@@ -1,26 +1,11 @@
-Both Fetch API and jQuery AJAX can do the same thing but 
-they feel very different to write.
+Both Fetch API and jQuery AJAX can do the same thing but they feel very different to write.
 
-Fetch API is more wordy because you need two .then() calls 
-just to get the data, and you also have to manually check 
-response.ok yourself. jQuery $.getJSON() is shorter to write 
-but you have to load the whole jQuery library just for that.
+Fetch API is more wordy because you need two .then() calls just to get the data, and you also have to manually check response.ok yourself. jQuery $.getJSON() is shorter to write but you have to load the whole jQuery library just for that.
 
-For promise chaining, I find async/await with Fetch easier 
-to read because it looks like normal code from top to bottom. 
-jQuery's .done() .fail() .always() is also clear but it feels 
-a bit old compared to modern JavaScript.
+For promise chaining, I find async/await with Fetch easier to read because it looks like normal code from top to bottom. jQuery's .done() .fail() .always() is also clear but it feels a bit old compared to modern JavaScript.
 
-Error handling in jQuery is more beginner friendly because 
-.fail() catches everything automatically. With Fetch you have 
-to remember to throw the error yourself when response.ok is 
-false, which I forgot to do the first time.
+Error handling in jQuery is more beginner friendly because .fail() catches everything automatically. With Fetch you have to remember to throw the error yourself when response.ok is false, which I forgot to do the first time.
 
-For browser support, Fetch API works on all modern browsers 
-now so there is no real reason to use jQuery just for AJAX 
-anymore.
+For browser support, Fetch API works on all modern browsers now so there is no real reason to use jQuery just for AJAX anymore.
 
-I prefer Fetch API because I don't need to install anything 
-extra and async/await makes the code cleaner. But for this 
-lab I can see why jQuery .done() .fail() .always() is useful 
-to learn since it shows a different way of handling async code.
+I prefer Fetch API because I don't need to install anything extra and async/await makes the code cleaner. But for this lab I can see why jQuery .done() .fail() .always() is useful to learn since it shows a different way of handling async code.
