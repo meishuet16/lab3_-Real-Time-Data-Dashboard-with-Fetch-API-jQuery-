@@ -1,0 +1,30 @@
+The Fetch API and jQuery AJAX are both tools for making HTTP requests, but they differ significantly in syntax, style, and philosophy.
+ SYNTAX VERBOSITY:
+ Fetch API is more verbose for simple tasks — you must check response.ok
+ manually because fetch() only rejects on network failure, not HTTP errors.
+ jQuery $.getJSON() is terser for basic GET requests but requires an
+ external library (~30KB). For modern projects, loading jQuery just for AJAX
+is often overkill.
+
+PROMISE CHAINING STYLE:
+Fetch API integrates natively with async/await, making it read like
+synchronous code (cleaner, easier to follow). jQuery uses its own
+Deferred/Promise system with .done()/.fail()/.always(), which is explicit
+but feels dated compared to native Promises and ES2017 async/await.
+
+ERROR HANDLING:
+Fetch requires explicit response.ok checking — a design choice that
+confuses beginners. jQuery's .fail() catches both network and HTTP errors
+more intuitively, making it arguably friendlier for newcomers.
+
+BROWSER SUPPORT:
+The native Fetch API is supported by all modern browsers (Chrome, Firefox,
+Safari, Edge). jQuery was once essential for IE compatibility, but with IE
+ now deprecated, its browser-support advantage is gone.
+
+MY PREFERENCE:
+I prefer the native Fetch API with async/await for new projects. The code
+ reads clearly, requires no dependencies, and fits perfectly into modern
+JavaScript patterns. However, if a project already uses jQuery for DOM
+manipulation, $.ajax() is a convenient choice since the library is already
+loaded. Bottom line: Fetch API for greenfield, jQuery AJAX for legacy or jQuery-heavy projects.
